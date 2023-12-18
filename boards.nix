@@ -11,7 +11,6 @@ let
   mkx86_64Board = mkBoard "x86_64-linux";
   mkRiscv32Board = mkBoard "riscv32-linux";
   mkRiscv64Board = mkBoard "riscv64-linux";
-  mkPpc64Board = mkBoard "powerpc64-linux";
 
   rkBin = pkgs.fetchFromGitHub {
     owner = "rockchip-linux";
@@ -28,7 +27,6 @@ in
   (mkRiscv32Board "qemu-riscv32_smode" [ "u-boot.bin" ] { })
   (mkRiscv64Board "qemu-riscv64" [ "u-boot.bin" ] { })
   (mkRiscv64Board "qemu-riscv64_smode" [ "u-boot.bin" ] { })
-  (mkPpc64Board "qemu-ppce500" [ "u-boot.bin" ] { })
   (mkx86_64Board "qemu-x86_64" [ "u-boot.rom" ] { })
 
   # other
