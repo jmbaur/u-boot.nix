@@ -20,7 +20,7 @@
 stdenv.mkDerivation (finalAttrs:
 let
   defaultConfig = lib.mapAttrs (_: lib.mkDefault)
-    (ubootLib.deserialize
+    (ubootLib._internal.deserialize
       (builtins.readFile "${finalAttrs.src}/configs/${boardName}_defconfig"));
 
   evaluatedConfig = (lib.evalModules {
@@ -31,7 +31,7 @@ let
     ];
   }).config;
 
-  dotconfig = ubootLib.serialize evaluatedConfig;
+  dotconfig = ubootLib._internal.serialize evaluatedConfig;
 
   filesToInstall = artifacts ++ [ ".config" ];
 in

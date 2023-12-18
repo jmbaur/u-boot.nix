@@ -4,14 +4,15 @@ let
 
   ubootLib = import ./lib.nix { inherit (prev) lib; };
 in
-builtins.listToAttrs (map
+{ ubootLib = ubootLib._external; }
+  // builtins.listToAttrs (map
   ({ name, value }:
-  prev.lib.nameValuePair
-    "uboot-${name}"
-    (prev.callPackage ./u-boot.nix {
-      boardName = name;
-      inherit ubootLib;
-      inherit (value) artifacts extraMakeFlags arch;
-    })
+    prev.lib.nameValuePair
+      "uboot-${name}"
+      (prev.callPackage ./u-boot.nix {
+        boardName = name;
+        inherit ubootLib;
+        inherit (value) artifacts extraMakeFlags arch;
+      })
   )
   boards)
