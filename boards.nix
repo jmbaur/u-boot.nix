@@ -40,6 +40,9 @@ in
       "ROCKCHIP_TPL=${rkBin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin"
     ];
   })
+  (mkAarch64Board "mt7986a_bpir3_sd" [ "u-boot.bin" ] { })
+  (mkAarch64Board "mt7986a_bpir3_emmc" [ "u-boot.bin" ] { })
+  (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { })
   (mkx86_64Board "coreboot" [ "u-boot.bin" ] { })
   (mkx86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { })
 ]
