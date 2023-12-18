@@ -31,6 +31,8 @@ in
 
   # other
   (mkArmv7Board "clearfog" [ "u-boot-with-spl.kwb" ] { })
+  (mkArmv7Board "clearfog_sata" [ "u-boot-with-spl.kwb" ] { })
+  (mkArmv7Board "clearfog_spi" [ "u-boot-with-spl.kwb" ] { })
   (mkArmv7Board "bananapi_m2_zero" [ "u-boot-sunxi-with-spl.bin" ] { })
   (mkAarch64Board "orangepi-5-rk3588s" [ "u-boot-rockchip.bin" ] {
     extraMakeFlags = [
