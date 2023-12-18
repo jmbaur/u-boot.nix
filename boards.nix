@@ -1,6 +1,10 @@
-{ pkgs }:
+{ pkgs, pkgsForBoard ? _: pkgs }:
 
 let
+  inherit (pkgs) lib;
+
+  ubootLib = import ./lib.nix { inherit lib; };
+
   mkBoard = arch: name: artifacts: { extraMakeFlags ? [ ] }: {
     inherit name;
     value = { inherit arch artifacts extraMakeFlags; };
@@ -19,7 +23,16 @@ let
     hash = "sha256-KUZQaQ+IZ0OynawlYGW99QGAOmOrGt2CZidI3NTxFw8=";
   };
 in
-[
+builtins.listToAttrs (map
+  ({ name, value }:
+  lib.nameValuePair
+    "uboot-${name}"
+    ((pkgsForBoard value.arch).callPackage ./u-boot.nix {
+      boardName = name;
+      inherit ubootLib;
+      inherit (value) artifacts extraMakeFlags arch;
+    })
+  ) [
   # qemu
   (mkArmv7Board "qemu_arm" [ "u-boot.bin" ] { })
   (mkAarch64Board "qemu_arm64" [ "u-boot.bin" ] { })
@@ -45,4 +58,4 @@ in
   (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { })
   (mkx86_64Board "coreboot" [ "u-boot.bin" ] { })
   (mkx86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { })
-]
+])
