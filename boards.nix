@@ -48,6 +48,7 @@ builtins.listToAttrs (map
   (mkArmv7Board "clearfog_spi" [ "u-boot-with-spl.kwb" ] { })
   (mkArmv7Board "bananapi_m2_zero" [ "u-boot-sunxi-with-spl.bin" ] { })
   (mkArmv7Board "bananapi_m2_plus_h3" [ "u-boot-sunxi-with-spl.bin" ] { })
+  (mkArmv7Board "rpi_0_w" [ "u-boot.bin" ] { })
   (mkAarch64Board "orangepi-5-rk3588s" [ "u-boot-rockchip.bin" ] {
     extraMakeFlags = [
       "BL31=${rkBin}/bin/rk35/rk3588_bl31_v1.40.elf"
@@ -57,6 +58,8 @@ builtins.listToAttrs (map
   (mkAarch64Board "mt7986a_bpir3_sd" [ "u-boot.bin" ] { })
   (mkAarch64Board "mt7986a_bpir3_emmc" [ "u-boot.bin" ] { })
   (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { })
+  (mkAarch64Board "rpi_4" [ "u-boot.bin" ] { })
+  (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { })
   (mkx86_64Board "coreboot" [ "u-boot.bin" ] { })
   (mkx86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { })
 ])
