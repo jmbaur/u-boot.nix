@@ -47,6 +47,7 @@ builtins.listToAttrs (map
   (mkArmv7Board "clearfog_sata" [ "u-boot-with-spl.kwb" ] { })
   (mkArmv7Board "clearfog_spi" [ "u-boot-with-spl.kwb" ] { })
   (mkArmv7Board "bananapi_m2_zero" [ "u-boot-sunxi-with-spl.bin" ] { })
+  (mkArmv7Board "bananapi_m2_plus_h3" [ "u-boot-sunxi-with-spl.bin" ] { })
   (mkAarch64Board "orangepi-5-rk3588s" [ "u-boot-rockchip.bin" ] {
     extraMakeFlags = [
       "BL31=${rkBin}/bin/rk35/rk3588_bl31_v1.40.elf"
