@@ -69,7 +69,10 @@ in
 
   buildInputs = [ ];
 
-  makeFlags = [ "CROSS_COMPILE=${stdenv.cc.targetPrefix}" ] ++ extraMakeFlags;
+  makeFlags = [
+    "CROSS_COMPILE=${stdenv.cc.targetPrefix}"
+    "DTC=${lib.getExe' pkgsBuildBuild.dtc "dtc"}"
+  ] ++ extraMakeFlags;
 
   inherit dotconfig;
   passAsFile = [ "dotconfig" ];
