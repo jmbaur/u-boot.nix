@@ -14,7 +14,7 @@ let
       lib.toIntBase10 value;
 in
 {
-  _internal = {
+  _internal = rec {
     deserialize = defconfig: builtins.listToAttrs
       (map
         (line:
@@ -37,28 +37,39 @@ in
             (builtins.match "^(# )?CONFIG_([A-Z0-9_]+)[=| is not set](.*)$")
             (lib.splitString "\n" defconfig))));
 
-    serialize = configAttrs:
+    serialize = configAttrs: _serialize { inherit configAttrs; debug = false; };
+    debugSerialize = configAttrs: _serialize { inherit configAttrs; debug = true; };
+
+    _serialize = { configAttrs ? { }, debug ? false }:
       lib.concatStringsSep "\n" (lib.mapAttrsToList
         (kconfOption: answer:
           let
             optionName = "CONFIG_${kconfOption}";
-          in
-          {
-            "bool" =
-              if answer.value == null then
-                "# ${optionName} is not set"
-              else
-                "${optionName}=${if answer.value then "y" else "n"}";
-            "freeform" =
-              if lib.isString answer.value &&
+            kconfLine = {
+              "bool" =
+                if answer.value == null then
+                  "# ${optionName} is not set"
+                else
+                  "${optionName}=${if answer.value then "y" else "n"}";
+              "freeform" =
+                if (lib.isString answer.value
+                  || lib.isPath answer.value
+                  || lib.isDerivation answer.value
+                ) &&
                 !(lib.hasPrefix "0x" answer.value) then
-                "${optionName}=\"${answer.value}\""
-              else
-                "${optionName}=${toString answer.value}";
-          }.${answer.ubootType}
+                  "${optionName}=\"${answer.value}\""
+                else
+                  "${optionName}=${toString answer.value}";
+            }.${answer.ubootType};
+          in
+          if debug then
+            lib.trace "GENERATED: ${kconfLine}" kconfLine
+          else
+            kconfLine
         )
         configAttrs);
   };
 
   _external = { inherit yes no unset freeform; };
 }
+
