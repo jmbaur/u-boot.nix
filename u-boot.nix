@@ -10,6 +10,7 @@
 , ncurses
 , bc
 , python3Packages
+, debug ? false
 , boardName
 , artifacts ? [ ]
 , extraMakeFlags ? [ ]
@@ -31,7 +32,7 @@ let
     ];
   }).config;
 
-  dotconfig = ubootLib._internal.serialize evaluatedConfig;
+  dotconfig = ubootLib._internal._serialize { configAttrs = evaluatedConfig; inherit debug; };
 
   filesToInstall = artifacts ++ [ ".config" ];
 in
