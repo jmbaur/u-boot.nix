@@ -93,4 +93,6 @@ in
   '';
 
   meta.platforms = [ arch ];
+
+  passthru.config = evaluatedConfig;
 })
