@@ -39,13 +39,13 @@ let
 in
 {
   pname = "uboot-${boardName}";
-  version = "2024.01-rc5";
+  version = "2024.01-rc6";
 
   src = fetchFromGitHub {
     owner = "u-boot";
     repo = "u-boot";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-QlwgvnSaXh39z9AM7HNF731lRiUkPbN3oQyioQNTYFA=";
+    hash = "sha256-fdgN6gVf2BPFnqvrdcT0WnkaB1r2s5K9gabdn+a4Djo=";
   };
 
   postPatch = ''
