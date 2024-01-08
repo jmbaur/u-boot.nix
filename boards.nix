@@ -5,9 +5,9 @@ let
 
   ubootLib = import ./lib.nix { inherit lib; };
 
-  mkBoard = arch: name: artifacts: { extraMakeFlags ? [ ] }: {
+  mkBoard = arch: name: artifacts: boardArgs: {
     inherit name;
-    value = { inherit arch artifacts extraMakeFlags; };
+    value = { inherit arch artifacts boardArgs; };
   };
 
   mkAarch64Board = mkBoard "aarch64-linux";
@@ -25,13 +25,21 @@ let
 in
 builtins.listToAttrs (map
   ({ name, value }:
+  let
+    boardPkgs = pkgsForBoard value.arch;
+    boardArgs =
+      if lib.isFunction value.boardArgs then
+        value.boardArgs boardPkgs
+      else
+        value.boardArgs;
+  in
   lib.nameValuePair
     "uboot-${name}"
-    ((pkgsForBoard value.arch).callPackage ./u-boot.nix {
+    (boardPkgs.callPackage ./u-boot.nix ({
       boardName = name;
       inherit ubootLib;
-      inherit (value) artifacts extraMakeFlags arch;
-    })
+      inherit (value) artifacts arch;
+    } // boardArgs))
   ) [
   # qemu
   (mkArmv7Board "qemu_arm" [ "u-boot.bin" ] { })
@@ -55,6 +63,11 @@ builtins.listToAttrs (map
       "ROCKCHIP_TPL=${rkBin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin"
     ];
   })
+  (mkAarch64Board "orangepi_zero3" [ "u-boot-sunxi-with-spl.bin" ] (pkgs: {
+    # TODO(jared): this board actually has an H618, can we still use the same
+    # TF-A build?
+    extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareAllwinnerH616}/bl31.bin" ];
+  }))
   (mkAarch64Board "mt7986a_bpir3_sd" [ "u-boot.bin" ] { })
   (mkAarch64Board "mt7986a_bpir3_emmc" [ "u-boot.bin" ] { })
   (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { })
