@@ -12,7 +12,7 @@ let
 
   mkAarch64Board = mkBoard "aarch64-linux";
   mkArmv7Board = mkBoard "armv7l-linux";
-  mkx86_64Board = mkBoard "x86_64-linux";
+  mkX86_64Board = mkBoard "x86_64-linux";
   mkRiscv32Board = mkBoard "riscv32-linux";
   mkRiscv64Board = mkBoard "riscv64-linux";
 
@@ -48,7 +48,7 @@ builtins.listToAttrs (map
   (mkRiscv32Board "qemu-riscv32_smode" [ "u-boot.bin" ] { })
   (mkRiscv64Board "qemu-riscv64" [ "u-boot.bin" ] { })
   (mkRiscv64Board "qemu-riscv64_smode" [ "u-boot.bin" ] { })
-  (mkx86_64Board "qemu-x86_64" [ "u-boot.rom" ] { })
+  (mkX86_64Board "qemu-x86_64" [ "u-boot.rom" ] { })
 
   # other
   (mkArmv7Board "clearfog" [ "u-boot-with-spl.kwb" ] { })
@@ -73,6 +73,6 @@ builtins.listToAttrs (map
   (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { })
   (mkAarch64Board "rpi_4" [ "u-boot.bin" ] { })
   (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { })
-  (mkx86_64Board "coreboot" [ "u-boot.bin" ] { })
-  (mkx86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { })
+  (mkX86_64Board "coreboot" [ "u-boot.bin" ] { })
+  (mkX86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { })
 ])
