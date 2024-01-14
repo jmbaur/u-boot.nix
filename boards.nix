@@ -48,6 +48,7 @@ builtins.listToAttrs (map
   (mkRiscv32Board "qemu-riscv32_smode" [ "u-boot.bin" ] { })
   (mkRiscv64Board "qemu-riscv64" [ "u-boot.bin" ] { })
   (mkRiscv64Board "qemu-riscv64_smode" [ "u-boot.bin" ] { })
+  (mkX86_64Board "qemu-x86" [ "u-boot.rom" ] { })
   (mkX86_64Board "qemu-x86_64" [ "u-boot.rom" ] { })
 
   # other
