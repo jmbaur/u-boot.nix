@@ -10,6 +10,7 @@
 , ncurses
 , bc
 , vim
+, which
 , python3Packages
 , debug ? false
 , boardName
@@ -57,13 +58,14 @@ in
   depsBuildBuild = [ pkgsBuildBuild.stdenv.cc ];
 
   nativeBuildInputs = [
+    bc
     bison
     flex
-    swig
-    openssl
     ncurses
-    bc
+    openssl
+    swig
     vim # xxd
+    which
   ] ++
   (with python3Packages; [ libfdt pyelftools setuptools ]);
 
