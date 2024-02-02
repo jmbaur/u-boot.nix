@@ -1,44 +1,30 @@
 { lib
 , ubootLib
-, stdenv
-, fetchFromGitHub
-, pkgsBuildBuild
-, bison
-, flex
-, swig
-, openssl
-, ncurses
 , bc
-, vim
-, which
+, bison
+, fetchFromGitHub
+, flex
+, ncurses
+, openssl
+, pkgsBuildBuild
 , python3Packages
-, debug ? false
+, stdenv
+, swig
+, which
+, xxd
+  # TODO(jared): document these options
 , boardName
 , artifacts ? [ ]
 , extraMakeFlags ? [ ]
 , arch
 , extraStructuredConfig ? { }
+, configfile ? null
 }:
 
-stdenv.mkDerivation (finalAttrs:
 let
-  defaultConfig = lib.mapAttrs (_: lib.mkDefault)
-    (ubootLib._internal.deserialize
-      (builtins.readFile "${finalAttrs.src}/configs/${boardName}_defconfig"));
-
-  evaluatedConfig = (lib.evalModules {
-    modules = [
-      { freeformType = lib.types.anything; }
-      defaultConfig
-      extraStructuredConfig
-    ];
-  }).config;
-
-  dotconfig = ubootLib._internal._serialize { configAttrs = evaluatedConfig; inherit debug; };
-
-  filesToInstall = artifacts ++ [ ".config" ];
+  extraConfig = ubootLib._internal.serialize extraStructuredConfig;
 in
-{
+stdenv.mkDerivation (finalAttrs: {
   pname = "uboot-${boardName}";
   version = "2024.01";
 
@@ -64,10 +50,13 @@ in
     ncurses
     openssl
     swig
-    vim # xxd
     which
-  ] ++
-  (with python3Packages; [ libfdt pyelftools setuptools ]);
+    xxd
+  ] ++ (with python3Packages; [
+    libfdt
+    pyelftools
+    setuptools
+  ]);
 
   buildInputs = [ ];
 
@@ -76,25 +65,29 @@ in
     "DTC=${lib.getExe' pkgsBuildBuild.dtc "dtc"}"
   ] ++ extraMakeFlags;
 
-  inherit dotconfig;
-  passAsFile = [ "dotconfig" ];
+  inherit extraConfig;
+  passAsFile = [ "extraConfig" ];
   configurePhase = ''
     runHook preConfigure
-    cat $dotconfigPath >.config
+  '' + (if configfile != null then ''
+    install -Dm0644 ${configfile} .config
+  '' else ''
+    bash ${./merge_config.bash} configs/${boardName}_defconfig $extraConfigPath
+  '') + ''
     make olddefconfig
     runHook postConfigure
   '';
 
   installPhase = ''
     runHook preInstall
-  '' + (lib.concatLines
-    (map
-      (file: "install -D --target-directory=$out ${file}")
-      filesToInstall)) + ''
+  '' + (lib.concatMapStrings
+    (file: ''
+      install -D --target-directory=$out ${file}
+    '')
+    (artifacts ++ [ ".config" ])) + ''
     runHook postInstall
   '';
 
   meta.platforms = [ arch ];
-
-  passthru.config = evaluatedConfig;
 })
+
