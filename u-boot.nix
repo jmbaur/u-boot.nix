@@ -72,7 +72,8 @@ stdenv.mkDerivation (finalAttrs: {
   '' + (if configfile != null then ''
     install -Dm0644 ${configfile} .config
   '' else ''
-    bash ${./merge_config.bash} configs/${boardName}_defconfig $extraConfigPath
+    bash ${./merge_config.bash} \
+      configs/${boardName}_defconfig $extraConfigPath >.config
   '') + ''
     make olddefconfig
     runHook postConfigure
