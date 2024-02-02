@@ -13,8 +13,9 @@ while read -r line; do
 
 	if line_nr=$(grep -n "$option" "$mutable_config" | cut -f1 -d:); then
 		sed "${line_nr}d" "$mutable_config"
-		echo "$line"
 	fi
+
+	echo "$line"
 done <"$extra_config"
 
 # use the rest of what is left from the base config
