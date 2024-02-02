@@ -74,6 +74,8 @@ builtins.listToAttrs (map
   (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { })
   (mkAarch64Board "rpi_4" [ "u-boot.bin" ] { })
   (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { })
+  (mkAarch64Board "p2771-0000-000" [ "u-boot.bin" ] { })
+  (mkAarch64Board "p2771-0000-500" [ "u-boot.bin" ] { })
   (mkX86_64Board "coreboot" [ "u-boot.bin" ] { })
   (mkX86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { })
 ])
