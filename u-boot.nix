@@ -1,15 +1,17 @@
-{ lib
-, ubootLib
-, bc
+{ bc
 , bison
 , fetchFromGitHub
 , flex
+, gnutls
+, lib
+, libuuid
 , ncurses
 , openssl
 , pkgsBuildBuild
 , python3Packages
 , stdenv
 , swig
+, ubootLib
 , which
 , xxd
   # TODO(jared): document these options
@@ -47,6 +49,8 @@ stdenv.mkDerivation (finalAttrs: {
     bc
     bison
     flex
+    gnutls
+    libuuid
     ncurses
     openssl
     swig
