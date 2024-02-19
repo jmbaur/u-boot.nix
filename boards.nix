@@ -1,8 +1,6 @@
-{ pkgs, pkgsForBoard ? _: pkgs }:
+{ pkgs, pkgsForBoard ? _: pkgs, lib ? pkgs.lib }:
 
 let
-  inherit (pkgs) lib;
-
   ubootLib = import ./lib.nix { inherit lib; };
 
   mkBoard = arch: name: artifacts: boardArgs: {
@@ -15,13 +13,6 @@ let
   mkX86_64Board = mkBoard "x86_64-linux";
   mkRiscv32Board = mkBoard "riscv32-linux";
   mkRiscv64Board = mkBoard "riscv64-linux";
-
-  rkBin = pkgs.fetchFromGitHub {
-    owner = "rockchip-linux";
-    repo = "rkbin";
-    rev = "b4558da0860ca48bf1a571dd33ccba580b9abe23";
-    hash = "sha256-KUZQaQ+IZ0OynawlYGW99QGAOmOrGt2CZidI3NTxFw8=";
-  };
 in
 builtins.listToAttrs (map
   ({ name, value }:
@@ -35,11 +26,15 @@ builtins.listToAttrs (map
   in
   lib.nameValuePair
     "uboot-${name}"
-    (boardPkgs.callPackage ./u-boot.nix ({
-      boardName = name;
-      inherit ubootLib;
-      inherit (value) artifacts arch;
-    } // boardArgs))
+    (boardPkgs.callPackage
+      (import ./u-boot.nix {
+        inherit (boardArgs) preConfigure;
+      })
+      ({
+        boardName = name;
+        inherit ubootLib;
+        inherit (value) artifacts arch;
+      } // builtins.removeAttrs boardArgs [ "preConfigure" ]))
   ) [
   # qemu
   (mkArmv7Board "qemu_arm" [ "u-boot.bin" ] { })
@@ -58,12 +53,12 @@ builtins.listToAttrs (map
   (mkArmv7Board "bananapi_m2_zero" [ "u-boot-sunxi-with-spl.bin" ] { })
   (mkArmv7Board "bananapi_m2_plus_h3" [ "u-boot-sunxi-with-spl.bin" ] { })
   (mkArmv7Board "rpi_0_w" [ "u-boot.bin" ] { })
-  (mkAarch64Board "orangepi-5-rk3588s" [ "u-boot-rockchip.bin" ] {
+  (mkAarch64Board "orangepi-5-rk3588s" [ "u-boot-rockchip.bin" ] (pkgs: {
     extraMakeFlags = [
-      "BL31=${rkBin}/bin/rk35/rk3588_bl31_v1.40.elf"
-      "ROCKCHIP_TPL=${rkBin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin"
+      "BL31=${pkgs.rockchipFirmware}/rk3588_bl31_v1.40.elf"
+      "ROCKCHIP_TPL=${pkgs.rockchipFirmware}/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin"
     ];
-  })
+  }))
   (mkAarch64Board "orangepi_zero3" [ "u-boot-sunxi-with-spl.bin" ] (pkgs: {
     # TODO(jared): this board actually has an H618, can we still use the same
     # TF-A build?
@@ -76,7 +71,12 @@ builtins.listToAttrs (map
   (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { })
   (mkAarch64Board "p2771-0000-000" [ "u-boot.bin" ] { })
   (mkAarch64Board "p2771-0000-500" [ "u-boot.bin" ] { })
-  (mkAarch64Board "xilinx_zynqmp_virt" [ "u-boot.bin" "spl/boot.bin" ] { })
+  (mkAarch64Board "phycore-imx8mm" [ "u-boot.itb" "spl/u-boot-spl.bin" "flash.bin" ] (pkgs: {
+    preConfigure = ''
+      install -m0644 --target-directory=$(pwd) ${pkgs.imxFirmware}/*
+    '';
+    extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareImx8mm}/bl31.bin" "flash.bin" ];
+  }))
   (mkX86_64Board "coreboot" [ "u-boot.bin" ] { })
   (mkX86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { })
 ])

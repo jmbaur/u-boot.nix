@@ -1,3 +1,4 @@
+{ preConfigure ? "" }:
 { bc
 , bison
 , fetchFromGitHub
@@ -69,8 +70,11 @@ stdenv.mkDerivation (finalAttrs: {
     "DTC=${lib.getExe' pkgsBuildBuild.dtc "dtc"}"
   ] ++ extraMakeFlags;
 
+
   inherit extraConfig;
   passAsFile = [ "extraConfig" ];
+
+  inherit preConfigure;
   configurePhase = ''
     runHook preConfigure
   '' + (if configfile != null then ''
