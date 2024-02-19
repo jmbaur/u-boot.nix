@@ -27,9 +27,9 @@ builtins.listToAttrs (map
   lib.nameValuePair
     "uboot-${name}"
     (boardPkgs.callPackage
-      (import ./u-boot.nix {
+      (import ./u-boot.nix (lib.optionalAttrs (boardArgs ? preConfigure) {
         inherit (boardArgs) preConfigure;
-      })
+      }))
       ({
         boardName = name;
         inherit ubootLib;
