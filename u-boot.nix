@@ -1,4 +1,4 @@
-{ preConfigure ? "" }:
+initialArgs:
 { bc
 , bison
 , fetchFromGitHub
@@ -18,8 +18,8 @@
   # TODO(jared): document these options
 , boardName
 , artifacts ? [ ]
-, extraMakeFlags ? [ ]
 , arch
+, extraMakeFlags ? [ ]
 , extraStructuredConfig ? { }
 , configfile ? null
 }:
@@ -27,7 +27,7 @@
 let
   extraConfig = ubootLib._internal.serialize extraStructuredConfig;
 in
-stdenv.mkDerivation (finalAttrs: {
+stdenv.mkDerivation (finalAttrs: (initialArgs // {
   pname = "uboot-${boardName}";
   version = "2024.01";
 
@@ -74,7 +74,6 @@ stdenv.mkDerivation (finalAttrs: {
   inherit extraConfig;
   passAsFile = [ "extraConfig" ];
 
-  inherit preConfigure;
   configurePhase = ''
     runHook preConfigure
   '' + (if configfile != null then ''
@@ -98,5 +97,5 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   meta.platforms = [ arch ];
-})
+}))
 
