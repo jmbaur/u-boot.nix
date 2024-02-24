@@ -15,7 +15,7 @@ while read -r line; do
 	# shellcheck disable=SC2001
 	option=$(sed "s/^.*\(CONFIG_[A-Z0-9_]\+\)[=\ ].*$/\1/" <<<"$line")
 
-	if line_nr=$(grep -n "$option" "$mutable_config" | cut -f1 -d:); then
+	if line_nr=$(grep -n "${option}[=\ ]" "$mutable_config" | cut -f1 -d:); then
 		sed -i "${line_nr}d" "$mutable_config"
 	fi
 

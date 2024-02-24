@@ -1,8 +1,6 @@
-{ pkgs, pkgsForBoard ? _: pkgs, lib ? pkgs.lib }:
+{ pkgs, pkgsForBoard ? _: pkgs }:
 
 let
-  ubootLib = import ./lib.nix { inherit lib; };
-
   mkBoard = arch: name: artifacts: initialBoardArgs: boardArgs: {
     inherit name;
     value = { inherit arch artifacts initialBoardArgs boardArgs; };
@@ -19,23 +17,24 @@ builtins.listToAttrs (map
   let
     boardPkgs = pkgsForBoard value.arch;
     initialBoardArgs =
-      if lib.isFunction value.initialBoardArgs then
+      if builtins.isFunction value.initialBoardArgs then
         value.initialBoardArgs boardPkgs
       else
         value.initialBoardArgs;
     boardArgs =
-      if lib.isFunction value.boardArgs then
+      if builtins.isFunction value.boardArgs then
         value.boardArgs boardPkgs
       else
         value.boardArgs;
   in
-  lib.nameValuePair
-    "uboot-${name}"
-    (boardPkgs.callPackage (import ./u-boot.nix initialBoardArgs) ({
+  {
+    name =
+      "uboot-${name}";
+    value = (boardPkgs.callPackage (import ./u-boot.nix initialBoardArgs) ({
       boardName = name;
-      inherit ubootLib;
       inherit (value) artifacts arch;
-    } // boardArgs))
+    } // boardArgs));
+  }
   ) [
   # qemu
   (mkArmv7Board "qemu_arm" [ "u-boot.bin" ] { } { })

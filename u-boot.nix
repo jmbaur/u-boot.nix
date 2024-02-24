@@ -12,7 +12,6 @@ initialArgs:
 , python3Packages
 , stdenv
 , swig
-, ubootLib
 , which
 , xxd
   # TODO(jared): document these options
@@ -25,7 +24,38 @@ initialArgs:
 }:
 
 let
-  extraConfig = ubootLib._internal.serialize extraStructuredConfig;
+  serializeToKconfConfig = configAttrs: lib.concatLines
+    (lib.mapAttrsToList
+      (kconfOption: answer:
+        let
+          optionName = "CONFIG_${kconfOption}";
+          kconfLine =
+            if answer ? freeform then
+              if (lib.isString answer.freeform
+                || lib.isPath answer.freeform
+                || lib.isDerivation answer.freeform
+              ) &&
+              !(lib.hasPrefix "0x" answer.freeform)
+              && (builtins.match "[0-9]+" answer.freeform == null) then
+                "${optionName}=\"${answer.value}\""
+              else
+                "${optionName}=${toString answer.freeform}"
+            else
+              assert answer ? tristate;
+              # We are reusing the existing `lib.kernel` options, but u-boot
+              # does not have anything similar to linux kernel modules.
+              assert answer.tristate != "m";
+              if answer.tristate != null then
+                "# ${optionName} is not set"
+              else
+                "${optionName}=${toString answer.value}"
+          ;
+        in
+        kconfLine
+      )
+      configAttrs);
+
+  extraConfig = serializeToKconfConfig extraStructuredConfig;
 in
 stdenv.mkDerivation (finalAttrs: (initialArgs // {
   pname = "uboot-${boardName}";
@@ -60,6 +90,7 @@ stdenv.mkDerivation (finalAttrs: (initialArgs // {
   ] ++ (with python3Packages; [
     libfdt
     pyelftools
+    pyopenssl
     setuptools
   ]);
 
