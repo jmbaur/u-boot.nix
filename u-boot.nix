@@ -37,7 +37,7 @@ let
               ) &&
               !(lib.hasPrefix "0x" answer.freeform)
               && (builtins.match "[0-9]+" answer.freeform == null) then
-                "${optionName}=\"${answer.value}\""
+                "${optionName}=\"${answer.freeform}\""
               else
                 "${optionName}=${toString answer.freeform}"
             else
@@ -45,10 +45,10 @@ let
               # We are reusing the existing `lib.kernel` options, but u-boot
               # does not have anything similar to linux kernel modules.
               assert answer.tristate != "m";
-              if answer.tristate != null then
+              if answer.tristate == null then
                 "# ${optionName} is not set"
               else
-                "${optionName}=${toString answer.value}"
+                "${optionName}=${toString answer.tristate}"
           ;
         in
         kconfLine
