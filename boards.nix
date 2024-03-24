@@ -55,7 +55,7 @@ builtins.listToAttrs (map
   (mkArmv7Board "rpi_0_w" [ "u-boot.bin" ] { } { })
   (mkAarch64Board "orangepi-5-rk3588s" [ "u-boot-rockchip.bin" ] { } (pkgs: {
     extraMakeFlags = [
-      "BL31=${pkgs.rkbin}/bin/rk35/rk3588_bl31_v1.45.elf"
+      "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
       "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
     ];
   }))

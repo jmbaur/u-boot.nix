@@ -11,8 +11,9 @@
         inherit system;
         overlays = [ self.overlays.default ];
         config.allowUnfreePredicate = pkg: builtins.elem pkg.pname [
-          "rkbin"
+          "arm-trusted-firmware-rk3588"
           "imx-firmware"
+          "rkbin"
         ];
       });
   };
