@@ -38,14 +38,12 @@ builtins.listToAttrs (
       in
       {
         name = "uboot-${name}";
-        value = (
-          boardPkgs.callPackage (import ./u-boot.nix initialBoardArgs) (
-            {
-              boardName = name;
-              inherit (value) artifacts arch;
-            }
-            // boardArgs
-          )
+        value = boardPkgs.callPackage (import ./u-boot.nix initialBoardArgs) (
+          {
+            boardName = name;
+            inherit (value) artifacts arch;
+          }
+          // boardArgs
         );
       }
     )
@@ -72,6 +70,11 @@ builtins.listToAttrs (
           "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
           "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
         ];
+      }))
+      (mkAarch64Board "orangepi_zero2w" [ "u-boot-sunxi-with-spl.bin" ] { } (pkgs: {
+        # TODO(jared): this board actually has an H618, can we still use the same
+        # TF-A build?
+        extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareAllwinnerH616}/bl31.bin" ];
       }))
       (mkAarch64Board "orangepi_zero3" [ "u-boot-sunxi-with-spl.bin" ] { } (pkgs: {
         # TODO(jared): this board actually has an H618, can we still use the same
@@ -103,6 +106,18 @@ builtins.listToAttrs (
           ];
         })
       )
+      (mkRiscv64Board "starfive_visionfive2" [ ] { } (pkgs: {
+        extraMakeFlags = [
+          "OPENSBI=${
+            pkgs.opensbi.overrideAttrs (old: {
+              makeFlags = old.makeFlags ++ [
+                "FW_TEXT_START=0x40000000"
+                "FW_OPTIONS=0"
+              ];
+            })
+          }/share/opensbi/lp64/generic/firmware/fw_dynamic.elf"
+        ];
+      }))
       (mkX86_64Board "coreboot" [ "u-boot.bin" ] { } { })
       (mkX86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { } { })
     ]
