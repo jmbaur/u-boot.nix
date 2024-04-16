@@ -122,8 +122,7 @@ stdenv.mkDerivation (
             ''
           else
             ''
-              bash ${./merge_config.bash} \
-                configs/${boardName}_defconfig $extraConfigPath >.config
+              bash ${./merge_config.bash} configs/${boardName}_defconfig $extraConfigPath
             ''
         )
         + ''
