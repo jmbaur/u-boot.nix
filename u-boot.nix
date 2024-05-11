@@ -35,9 +35,11 @@ let
           kconfLine =
             if answer ? freeform then
               if
-                (lib.isString answer.freeform || lib.isPath answer.freeform || lib.isDerivation answer.freeform)
+                (
+                  (lib.isPath answer.freeform || lib.isDerivation answer.freeform)
+                  || (lib.isString answer.freeform && builtins.match "[0-9]+" answer.freeform == null)
+                )
                 && !(lib.hasPrefix "0x" answer.freeform)
-                && (builtins.match "[0-9]+" answer.freeform == null)
               then
                 "${optionName}=\"${answer.freeform}\""
               else
