@@ -66,13 +66,13 @@ stdenv.mkDerivation (
     initialArgs
     // {
       pname = "uboot-${boardName}";
-      version = "2024.04";
+      version = "2024.07";
 
       src = fetchFromGitHub {
         owner = "u-boot";
         repo = "u-boot";
         rev = "v${finalAttrs.version}";
-        hash = "sha256-IlaDdjKq/Pq2orzcU959h93WXRZfvKBGDO/MFw9mZMg=";
+        hash = "sha256-mJ2TBy0Y5ZtcGFgtU5RKr0UDUp5FWzojbFb+o/ebRJU=";
       };
 
       postPatch = ''
