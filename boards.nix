@@ -88,12 +88,7 @@ builtins.listToAttrs (
       (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { } { })
       (mkAarch64Board "p2771-0000-000" [ "u-boot.bin" ] { } { })
       (mkAarch64Board "p2771-0000-500" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "phycore-imx8mm"
-        [
-          "u-boot.itb"
-          "spl/u-boot-spl.bin"
-          "flash.bin"
-        ]
+      (mkAarch64Board "phycore-imx8mm" [ "flash.bin" ]
         (pkgs: {
           preConfigure = ''
             install -m0644 --target-directory=$(pwd) ${pkgs.imxFirmware}/*
