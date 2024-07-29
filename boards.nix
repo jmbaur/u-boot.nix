@@ -65,12 +65,19 @@ builtins.listToAttrs (
       (mkArmv7Board "bananapi_m2_zero" [ "u-boot-sunxi-with-spl.bin" ] { } { })
       (mkArmv7Board "bananapi_m2_plus_h3" [ "u-boot-sunxi-with-spl.bin" ] { } { })
       (mkArmv7Board "rpi_0_w" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "orangepi-5-rk3588s" [ "u-boot-rockchip.bin" ] { } (pkgs: {
-        extraMakeFlags = [
-          "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
-          "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
-        ];
-      }))
+      (mkAarch64Board "orangepi-5-rk3588s"
+        [
+          "u-boot-rockchip.bin"
+          "u-boot-rockchip-spi.bin"
+        ]
+        { }
+        (pkgs: {
+          extraMakeFlags = [
+            "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
+            "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
+          ];
+        })
+      )
       (mkAarch64Board "orangepi_zero2w" [ "u-boot-sunxi-with-spl.bin" ] { } (pkgs: {
         # TODO(jared): this board actually has an H618, can we still use the same
         # TF-A build?
