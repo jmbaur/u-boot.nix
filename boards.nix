@@ -91,6 +91,7 @@ builtins.listToAttrs (
       (mkAarch64Board "mt7986a_bpir3_emmc" [ "u-boot.bin" ] { } { })
       (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { } { })
       (mkAarch64Board "rpi_4" [ "u-boot.bin" ] { } { })
+      (mkAarch64Board "rpi_arm64" [ "u-boot.bin" ] { } { })
       (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { } { })
       (mkAarch64Board "p2771-0000-000" [ "u-boot.bin" ] { } { })
       (mkAarch64Board "p2771-0000-500" [ "u-boot.bin" ] { } { })
