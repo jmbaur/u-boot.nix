@@ -77,6 +77,8 @@ stdenv.mkDerivation (
       patchShebangs tools scripts
     '';
 
+    hardeningDisable = [ "all" ];
+
     enableParallelBuilding = true;
 
     depsBuildBuild = [ pkgsBuildBuild.stdenv.cc ];
