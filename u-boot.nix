@@ -137,7 +137,7 @@ stdenv.mkDerivation (
         runHook preInstall
       ''
       + (lib.concatMapStrings (file: ''
-        install -D --target-directory=$out ${file}
+        install -Dm0644 --target-directory=$out ${file}
       '') (artifacts ++ [ ".config" ]))
       + ''
         runHook postInstall
