@@ -6,11 +6,11 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "imx-firmware";
-  version = "8.22";
+  version = "8.27-5af0ceb";
 
   src = fetchurl {
     url = "http://sources.buildroot.net/firmware-imx/firmware-imx-${finalAttrs.version}.bin";
-    hash = "sha256-lMi86sVuxQPCMuYU931rvY4Xx9qnHU5lHqj9UDTDA1A=";
+    hash = "sha256-Yfkl5garAgsaNvP39+RZxoR/W528eUIfnvhuj8Ek6y8=";
   };
 
   dontUnpack = true;
