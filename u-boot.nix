@@ -64,13 +64,13 @@ stdenv.mkDerivation (
   finalAttrs:
   (lib.recursiveUpdate initialArgs {
     pname = "uboot-${boardName}";
-    version = "2025.04";
+    version = "2025.07-rc5";
 
     src = fetchFromGitHub {
       owner = "u-boot";
       repo = "u-boot";
       rev = "v${finalAttrs.version}";
-      hash = "sha256-Cfn8Zr1qDQusrWHofMge6zFSawRcH12BkdG5GlFa8+4=";
+      hash = "sha256-tIQMeszvDlpu8Of3vluoA2T0OgVWaAKyFMj50U2y+j0=";
     };
 
     postPatch = ''
