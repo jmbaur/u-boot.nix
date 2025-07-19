@@ -9,7 +9,7 @@ stdenv.mkDerivation (finalAttrs: {
   version = "8.27-5af0ceb";
 
   src = fetchurl {
-    url = "http://sources.buildroot.net/firmware-imx/firmware-imx-${finalAttrs.version}.bin";
+    url = "https://sources.buildroot.net/firmware-imx/firmware-imx-${finalAttrs.version}.bin";
     hash = "sha256-Yfkl5garAgsaNvP39+RZxoR/W528eUIfnvhuj8Ek6y8=";
   };
 
