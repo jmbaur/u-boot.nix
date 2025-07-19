@@ -95,6 +95,16 @@ builtins.listToAttrs (
       (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { } { })
       (mkAarch64Board "p2771-0000-000" [ "u-boot.bin" ] { } { })
       (mkAarch64Board "p2771-0000-500" [ "u-boot.bin" ] { } { })
+      (mkAarch64Board "imx8mp_evk" [ "flash.bin" ]
+        (pkgs: {
+          preConfigure = ''
+            install -m0644 --target-directory=$(pwd) ${pkgs.imxFirmware}/*
+          '';
+        })
+        (pkgs: {
+          extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareImx8mp}/bl31.bin" ];
+        })
+      )
       (mkAarch64Board "phycore-imx8mm" [ "flash.bin" ]
         (pkgs: {
           preConfigure = ''
@@ -102,10 +112,7 @@ builtins.listToAttrs (
           '';
         })
         (pkgs: {
-          extraMakeFlags = [
-            "BL31=${pkgs.armTrustedFirmwareImx8mm}/bl31.bin"
-            "flash.bin"
-          ];
+          extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareImx8mm}/bl31.bin" ];
         })
       )
       (mkRiscv64Board "starfive_visionfive2" [ ] { } (pkgs: {
