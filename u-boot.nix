@@ -83,65 +83,65 @@ stdenv.mkDerivation (
 
     depsBuildBuild = [ pkgsBuildBuild.stdenv.cc ];
 
-    nativeBuildInputs =
-      [
-        bc
-        bison
-        flex
-        gnutls
-        libuuid
-        ncurses
-        openssl
-        swig
-        which
-        xxd
-      ]
-      ++ (with python3Packages; [
-        libfdt
-        pyelftools
-        pyopenssl
-        setuptools
-      ]);
+    nativeBuildInputs = [
+      bc
+      bison
+      flex
+      gnutls
+      libuuid
+      ncurses
+      openssl
+      swig
+      which
+      xxd
+    ]
+    ++ (with python3Packages; [
+      libfdt
+      pyelftools
+      pyopenssl
+      setuptools
+    ]);
 
     buildInputs = [ ];
 
     makeFlags = [
       "CROSS_COMPILE=${stdenv.cc.targetPrefix}"
       "DTC=${lib.getExe' pkgsBuildBuild.dtc "dtc"}"
-    ] ++ extraMakeFlags;
+    ]
+    ++ extraMakeFlags;
+
+    env.NIX_CFLAGS_COMPILE = "-fomit-frame-pointer";
 
     inherit extraConfig;
     passAsFile = [ "extraConfig" ];
 
-    configurePhase =
-      ''
-        runHook preConfigure
-      ''
-      + (
-        if configfile != null then
-          ''
-            install -Dm0644 ${configfile} .config
-          ''
-        else
-          ''
-            bash ${./merge_config.bash} configs/${boardName}_defconfig $extraConfigPath
-          ''
-      )
-      + ''
-        make olddefconfig
-        runHook postConfigure
-      '';
+    configurePhase = ''
+      runHook preConfigure
+    ''
+    + (
+      if configfile != null then
+        ''
+          install -Dm0644 ${configfile} .config
+        ''
+      else
+        ''
+          bash ${./merge_config.bash} configs/${boardName}_defconfig $extraConfigPath
+        ''
+    )
+    + ''
+      make olddefconfig
+      runHook postConfigure
+    '';
 
-    installPhase =
-      ''
-        runHook preInstall
-      ''
-      + (lib.concatMapStrings (file: ''
-        install -Dm0644 --target-directory=$out ${file}
-      '') (artifacts ++ [ ".config" ]))
-      + ''
-        runHook postInstall
-      '';
+    installPhase = ''
+      runHook preInstall
+    ''
+    + (lib.concatMapStrings (file: ''
+      install -Dm0644 --target-directory=$out ${file}
+    '') (artifacts ++ [ ".config" ]))
+    + ''
+      runHook postInstall
+    '';
 
     meta.platforms = [ arch ];
   })

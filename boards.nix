@@ -58,6 +58,7 @@ builtins.listToAttrs (
       (mkX86_64Board "qemu-x86" [ "u-boot.rom" ] { } { })
 
       # other
+      (mkArmv7Board "socfpga_de10_nano" [ "spl/u-boot-spl.sfp" ] { } { })
       (mkArmv7Board "clearfog" [ "u-boot-with-spl.kwb" ] { } { })
       (mkArmv7Board "clearfog_sata" [ "u-boot-with-spl.kwb" ] { } { })
       (mkArmv7Board "clearfog_spi" [ "u-boot-with-spl.kwb" ] { } { })

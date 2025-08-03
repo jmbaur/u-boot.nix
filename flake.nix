@@ -4,7 +4,18 @@
   outputs =
     { self, nixpkgs }:
     {
-      formatter = nixpkgs.lib.mapAttrs (_: pkgs: pkgs.nixfmt-rfc-style) self.legacyPackages;
+      formatter = nixpkgs.lib.mapAttrs (
+        _: pkgs:
+        pkgs.treefmt.withConfig {
+          runtimeInputs = [ pkgs.nixfmt ];
+          settings = {
+            formatter.nixfmt = {
+              command = "nixfmt";
+              includes = [ "*.nix" ];
+            };
+          };
+        }
+      ) self.legacyPackages;
       overlays.default = import ./overlay.nix;
       checks = nixpkgs.lib.mapAttrs (_: pkgs: import ./checks.nix { inherit pkgs; }) self.legacyPackages;
       legacyPackages =
