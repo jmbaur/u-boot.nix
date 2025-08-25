@@ -1,134 +1,210 @@
-{
-  pkgs,
-  pkgsForBoard ? _: pkgs,
-}:
+final: prev:
 
 let
-  mkBoard = arch: name: artifacts: initialBoardArgs: boardArgs: {
-    inherit name;
-    value = {
-      inherit
-        arch
-        artifacts
-        initialBoardArgs
-        boardArgs
-        ;
-    };
-  };
-
-  mkAarch64Board = mkBoard "aarch64-linux";
-  mkArmv7Board = mkBoard "armv7l-linux";
-  mkX86_64Board = mkBoard "x86_64-linux";
-  mkRiscv32Board = mkBoard "riscv32-linux";
-  mkRiscv64Board = mkBoard "riscv64-linux";
+  inherit (final)
+    armTrustedFirmwareAllwinnerH616
+    armTrustedFirmwareImx8mm
+    armTrustedFirmwareImx8mp
+    armTrustedFirmwareRK3588
+    imxFirmware
+    makeUBoot
+    opensbi
+    rkbin
+    ;
 in
 builtins.listToAttrs (
   map
-    (
-      { name, value }:
-      let
-        boardPkgs = pkgsForBoard value.arch;
-        initialBoardArgs =
-          if builtins.isFunction value.initialBoardArgs then
-            value.initialBoardArgs boardPkgs
-          else
-            value.initialBoardArgs;
-        boardArgs =
-          if builtins.isFunction value.boardArgs then value.boardArgs boardPkgs else value.boardArgs;
-      in
-      {
-        name = "uboot-${name}";
-        value = boardPkgs.callPackage (import ./u-boot.nix initialBoardArgs) (
-          {
-            boardName = name;
-            inherit (value) artifacts arch;
-          }
-          // boardArgs
-        );
-      }
-    )
+    (args: {
+      name = "uboot-${args.boardName}";
+      value = makeUBoot args;
+    })
     [
       # qemu
-      (mkArmv7Board "qemu_arm" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "qemu_arm64" [ "u-boot.bin" ] { } { })
-      (mkRiscv32Board "qemu-riscv32" [ "u-boot.bin" ] { } { })
-      (mkRiscv32Board "qemu-riscv32_smode" [ "u-boot.bin" ] { } { })
-      (mkRiscv64Board "qemu-riscv64" [ "u-boot.bin" ] { } { })
-      (mkRiscv64Board "qemu-riscv64_smode" [ "u-boot.bin" ] { } { })
-      (mkX86_64Board "qemu-x86" [ "u-boot.rom" ] { } { })
+      {
+        boardName = "qemu_arm";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "qemu_arm64";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "qemu-riscv32";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "riscv32-linux" ];
+      }
+      {
+        boardName = "qemu-riscv32_smode";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "riscv32-linux" ];
+      }
+      {
+        boardName = "qemu-riscv64";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "riscv64-linux" ];
+      }
+      {
+        boardName = "qemu-riscv64_smode";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "riscv64-linux" ];
+      }
+      {
+        boardName = "qemu-x86";
+        artifacts = [ "u-boot.rom" ];
+        meta.platforms = [ "x86_64-linux" ];
+      }
 
       # other
-      (mkArmv7Board "socfpga_de10_nano" [ "spl/u-boot-spl.sfp" ] { } { })
-      (mkArmv7Board "clearfog" [ "u-boot-with-spl.kwb" ] { } { })
-      (mkArmv7Board "clearfog_sata" [ "u-boot-with-spl.kwb" ] { } { })
-      (mkArmv7Board "clearfog_spi" [ "u-boot-with-spl.kwb" ] { } { })
-      (mkArmv7Board "bananapi_m2_zero" [ "u-boot-sunxi-with-spl.bin" ] { } { })
-      (mkArmv7Board "bananapi_m2_plus_h3" [ "u-boot-sunxi-with-spl.bin" ] { } { })
-      (mkArmv7Board "rpi_0_w" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "orangepi-5-rk3588s"
-        [
+      {
+        boardName = "socfpga_de10_nano";
+        artifacts = [ "spl/u-boot-spl.sfp" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "clearfog";
+        artifacts = [ "u-boot-with-spl.kwb" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "clearfog_sata";
+        artifacts = [ "u-boot-with-spl.kwb" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "clearfog_spi";
+        artifacts = [ "u-boot-with-spl.kwb" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "bananapi_m2_zero";
+        artifacts = [ "u-boot-sunxi-with-spl.bin" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "bananapi_m2_plus_h3";
+        artifacts = [ "u-boot-sunxi-with-spl.bin" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "rpi_0_w";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "armv7l-linux" ];
+      }
+      {
+        boardName = "orangepi-5-rk3588s";
+        artifacts = [
           "u-boot-rockchip.bin"
           "u-boot-rockchip-spi.bin"
-        ]
-        { }
-        (pkgs: {
-          extraMakeFlags = [
-            "BL31=${pkgs.armTrustedFirmwareRK3588}/bl31.elf"
-            "ROCKCHIP_TPL=${pkgs.rkbin.TPL_RK3588}"
-          ];
-        })
-      )
-      (mkAarch64Board "orangepi_zero2w" [ "u-boot-sunxi-with-spl.bin" ] { } (pkgs: {
+        ];
+        makeFlags = [
+          "BL31=${armTrustedFirmwareRK3588}/bl31.elf"
+          "ROCKCHIP_TPL=${rkbin.TPL_RK3588}"
+        ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "orangepi_zero2w";
+        artifacts = [ "u-boot-sunxi-with-spl.bin" ];
         # TODO(jared): this board actually has an H618, can we still use the same
         # TF-A build?
-        extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareAllwinnerH616}/bl31.bin" ];
-      }))
-      (mkAarch64Board "orangepi_zero3" [ "u-boot-sunxi-with-spl.bin" ] { } (pkgs: {
+        makeFlags = [ "BL31=${armTrustedFirmwareAllwinnerH616}/bl31.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "orangepi_zero3";
+        artifacts = [ "u-boot-sunxi-with-spl.bin" ];
         # TODO(jared): this board actually has an H618, can we still use the same
         # TF-A build?
-        extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareAllwinnerH616}/bl31.bin" ];
-      }))
-      (mkAarch64Board "mt7986a_bpir3_sd" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "mt7986a_bpir3_emmc" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "mvebu_mcbin-88f8040" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "rpi_4" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "rpi_arm64" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "mt8183_pumpkin" [ "u-boot-mtk.bin" ] { } { })
-      (mkAarch64Board "p2771-0000-000" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "p2771-0000-500" [ "u-boot.bin" ] { } { })
-      (mkAarch64Board "imx8mp_evk" [ "flash.bin" ]
-        (pkgs: {
-          preConfigure = ''
-            install -m0644 --target-directory=$(pwd) ${pkgs.imxFirmware}/*
-          '';
-        })
-        (pkgs: {
-          extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareImx8mp}/bl31.bin" ];
-        })
-      )
-      (mkAarch64Board "phycore-imx8mm" [ "flash.bin" ]
-        (pkgs: {
-          preConfigure = ''
-            install -m0644 --target-directory=$(pwd) ${pkgs.imxFirmware}/*
-          '';
-        })
-        (pkgs: {
-          extraMakeFlags = [ "BL31=${pkgs.armTrustedFirmwareImx8mm}/bl31.bin" ];
-        })
-      )
-      (mkRiscv64Board "starfive_visionfive2" [ ] { } (pkgs: {
-        extraMakeFlags = [
+        makeFlags = [ "BL31=${armTrustedFirmwareAllwinnerH616}/bl31.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "mt7986a_bpir3_sd";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "mt7986a_bpir3_emmc";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "mvebu_mcbin-88f8040";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "rpi_4";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "rpi_arm64";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "mt8183_pumpkin";
+        artifacts = [ "u-boot-mtk.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "p2771-0000-000";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "p2771-0000-500";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "imx8mp_evk";
+        artifacts = [ "flash.bin" ];
+        preConfigure = ''
+          install -m0644 --target-directory=$(pwd) ${imxFirmware}/*
+        '';
+        makeFlags = [ "BL31=${armTrustedFirmwareImx8mp}/bl31.bin" ];
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "phycore-imx8mm";
+        artifacts = [ "flash.bin" ];
+        makeFlags = [ "BL31=${armTrustedFirmwareImx8mm}/bl31.bin" ];
+        preConfigure = ''
+          install -m0644 --target-directory=$(pwd) ${imxFirmware}/*
+        '';
+        meta.platforms = [ "aarch64-linux" ];
+      }
+      {
+        boardName = "starfive_visionfive2";
+        artifacts = [
+          "u-boot.bin"
+          "spl/u-boot-spl.bin"
+        ];
+        makeFlags = [
           "OPENSBI=${
-            pkgs.opensbi.overrideAttrs (old: {
-              makeFlags = old.makeFlags ++ [
+            opensbi.overrideAttrs (old: {
+              makeFlags = (old.makeFlags or [ ]) ++ [
                 "FW_TEXT_START=0x40000000"
                 "FW_OPTIONS=0"
               ];
             })
           }/share/opensbi/lp64/generic/firmware/fw_dynamic.elf"
         ];
-      }))
-      (mkX86_64Board "coreboot" [ "u-boot.bin" ] { } { })
-      (mkX86_64Board "coreboot64" [ "u-boot-x86-with-spl.bin" ] { } { })
+        meta.platforms = [ "riscv64-linux" ];
+      }
+      {
+        boardName = "coreboot";
+        artifacts = [ "u-boot.bin" ];
+        meta.platforms = [ "x86_64-linux" ];
+      }
+      {
+        boardName = "coreboot64";
+        artifacts = [ "u-boot-x86-with-spl.bin" ];
+        meta.platforms = [ "x86_64-linux" ];
+      }
     ]
 )

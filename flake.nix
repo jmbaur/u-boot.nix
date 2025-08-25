@@ -2,33 +2,44 @@
   description = "u-boot configuration within nix";
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   outputs =
-    { self, nixpkgs }:
+    inputs:
+    let
+      inherit (inputs.nixpkgs.lib)
+        composeManyExtensions
+        genAttrs
+        mapAttrs
+        ;
+    in
     {
-      formatter = nixpkgs.lib.mapAttrs (
+      formatter = mapAttrs (
         _: pkgs:
         pkgs.treefmt.withConfig {
           runtimeInputs = [ pkgs.nixfmt ];
-          settings = {
-            formatter.nixfmt = {
-              command = "nixfmt";
-              includes = [ "*.nix" ];
-            };
-          };
+          settings.formatter.nixfmt.command = "nixfmt";
+          settings.formatter.nixfmt.includes = [ "*.nix" ];
         }
-      ) self.legacyPackages;
-      overlays.default = import ./overlay.nix;
-      checks = nixpkgs.lib.mapAttrs (_: pkgs: import ./checks.nix { inherit pkgs; }) self.legacyPackages;
+      ) inputs.self.legacyPackages;
+      overlays.default = composeManyExtensions [
+        (final: prev: {
+          makeUBoot = final.callPackage ./u-boot.nix { };
+          imxFirmware = final.callPackage ./misc/imx-firmware.nix { };
+          armTrustedFirmwareImx8mm = final.callPackage ./misc/imx8mm-arm-trusted-firmware.nix { };
+          armTrustedFirmwareImx8mp = final.callPackage ./misc/imx8mp-arm-trusted-firmware.nix { };
+        })
+        (import ./boards.nix)
+      ];
+      checks = mapAttrs (_: pkgs: import ./checks.nix { inherit pkgs; }) inputs.self.legacyPackages;
       legacyPackages =
-        nixpkgs.lib.genAttrs
+        genAttrs
           [
             "x86_64-linux"
             "aarch64-linux"
           ]
           (
             system:
-            import nixpkgs {
+            import inputs.nixpkgs {
               inherit system;
-              overlays = [ self.overlays.default ];
+              overlays = [ inputs.self.overlays.default ];
               config.allowUnfreePredicate =
                 pkg:
                 builtins.elem pkg.pname [
