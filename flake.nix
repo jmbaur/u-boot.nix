@@ -14,13 +14,19 @@
       formatter = mapAttrs (
         _: pkgs:
         pkgs.treefmt.withConfig {
-          runtimeInputs = [ pkgs.nixfmt ];
+          runtimeInputs = [
+            pkgs.nixfmt
+            pkgs.ruff
+          ];
           settings.formatter.nixfmt.command = "nixfmt";
           settings.formatter.nixfmt.includes = [ "*.nix" ];
+          settings.formatter.ruff.command = "ruff";
+          settings.formatter.ruff.options = [ "format" ];
+          settings.formatter.ruff.includes = [ "*.py" ];
         }
       ) inputs.self.legacyPackages;
       overlays.default = composeManyExtensions [
-        (final: prev: {
+        (final: _: {
           makeUBoot = final.callPackage ./u-boot.nix { };
           imxFirmware = final.callPackage ./misc/imx-firmware.nix { };
           armTrustedFirmwareImx8mm = final.callPackage ./misc/imx8mm-arm-trusted-firmware.nix { };

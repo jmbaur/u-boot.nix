@@ -1,4 +1,4 @@
-final: prev:
+final: _:
 
 let
   inherit (final)
