@@ -28,7 +28,34 @@
         })
         (import ./boards.nix)
       ];
-      checks = mapAttrs (_: pkgs: import ./checks.nix { inherit pkgs; }) inputs.self.legacyPackages;
+      checks = mapAttrs (
+        _: pkgs:
+        (import ./checks.nix { inherit pkgs; })
+        // {
+          kconfig-py =
+            pkgs.runCommand "kconfig-py-check"
+              {
+                nativeBuildInputs = [ pkgs.python3.pkgs.pytest ];
+              }
+              ''
+                pytest ${./kconfig.py}
+                touch $out
+              '';
+        }
+      ) inputs.self.legacyPackages;
+      devShells = mapAttrs (system: pkgs: {
+        default = pkgs.mkShell {
+          inputsFrom = [
+            (
+              {
+                "x86_64-linux" = pkgs.uboot-qemu-x86;
+                "aarch64-linux" = pkgs.uboot-qemu_arm64;
+              }
+              .${system}
+            )
+          ];
+        };
+      }) inputs.self.legacyPackages;
       legacyPackages =
         genAttrs
           [
