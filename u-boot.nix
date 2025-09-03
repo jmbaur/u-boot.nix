@@ -26,103 +26,107 @@ lib.extendMkDerivation {
 
   extendDrvArgs =
     finalAttrs:
-    {
-      # The name of the board. This should match the filename of the defconfig
-      # in the `configs` directory, without the "_defconfig" suffix.
-      boardName,
+    lib.makeOverridable (
+      {
+        # The name of the board. This should match the filename of the defconfig
+        # in the `configs` directory, without the "_defconfig" suffix.
+        boardName,
 
-      # File paths to install in the nix output in the install phase.
-      artifacts ? [ ],
+        # File paths to install in the nix output in the install phase.
+        artifacts ? [ ],
 
-      # Any desired kconfig configuration. This will be merged with the
-      # defconfig prior to running the `olddefconfig` make target.
-      kconfig ? { },
-      ...
-    }@args:
+        # Any desired kconfig configuration. This will be merged with the
+        # defconfig prior to running the `olddefconfig` make target.
+        kconfig ? { },
+        ...
+      }@prevAttrs:
 
-    {
-      pname = args.pname or "uboot-${boardName}";
-      version = args.version or "2025.07";
+      {
+        inherit kconfig artifacts;
 
-      src =
-        args.src or (fetchFromGitHub {
-          owner = "u-boot";
-          repo = "u-boot";
-          rev = "v${finalAttrs.version}";
-          hash = "sha256-X+JhVkDudkvQo08hGwAChOeMZZR+iunT9aU6tSAuMmg=";
-        });
+        pname = prevAttrs.pname or "uboot-${boardName}";
+        version = prevAttrs.version or "2025.07";
 
-      __structuredAttrs = true;
+        src =
+          prevAttrs.src or (fetchFromGitHub {
+            owner = "u-boot";
+            repo = "u-boot";
+            rev = "v${finalAttrs.version}";
+            hash = "sha256-X+JhVkDudkvQo08hGwAChOeMZZR+iunT9aU6tSAuMmg=";
+          });
 
-      postPatch = ''
-        patchShebangs tools scripts
-        ${args.postPatch or ""}
-      '';
+        __structuredAttrs = true;
 
-      hardeningDisable = [ "all" ];
+        postPatch = ''
+          patchShebangs tools scripts
+          ${prevAttrs.postPatch or ""}
+        '';
 
-      enableParallelBuilding = true;
+        hardeningDisable = [ "all" ];
 
-      depsBuildBuild = [
-        pkgsBuildBuild.stdenv.cc
-        pkgsBuildBuild.efitools # TODO(jared): for some reason doesn't work when callPackage'd
-      ]
-      ++ args.depsBuildBuild or [ ];
+        enableParallelBuilding = true;
 
-      nativeBuildInputs = [
-        bc
-        bison
-        dtc
-        flex
-        gnutls
-        jq
-        libuuid
-        ncurses
-        openssl
-        perl
-        swig
-        which
-        xxd
-        (python3.pythonOnBuildForHost.withPackages (
-          p: with p; [
-            libfdt
-            pyelftools
-            pyopenssl
-            setuptools
-          ]
-        ))
-      ]
-      ++ args.nativeBuildInputs or [ ];
+        depsBuildBuild = [
+          pkgsBuildBuild.stdenv.cc
+          pkgsBuildBuild.efitools # TODO(jared): for some reason doesn't work when callPackage'd
+        ]
+        ++ prevAttrs.depsBuildBuild or [ ];
 
-      makeFlags = [ "CROSS_COMPILE=${stdenv.cc.targetPrefix}" ] ++ args.makeFlags or [ ];
+        nativeBuildInputs = [
+          bc
+          bison
+          dtc
+          flex
+          gnutls
+          jq
+          libuuid
+          ncurses
+          openssl
+          perl
+          swig
+          which
+          xxd
+          (python3.pythonOnBuildForHost.withPackages (
+            p: with p; [
+              libfdt
+              pyelftools
+              pyopenssl
+              setuptools
+            ]
+          ))
+        ]
+        ++ prevAttrs.nativeBuildInputs or [ ];
 
-      env.NIX_CFLAGS_COMPILE = "-fomit-frame-pointer";
+        makeFlags = [ "CROSS_COMPILE=${stdenv.cc.targetPrefix}" ] ++ prevAttrs.makeFlags or [ ];
 
-      configurePhase = ''
-        runHook preConfigure
+        env.NIX_CFLAGS_COMPILE = "-fomit-frame-pointer";
 
-        ${
-          if lib.isPath kconfig then
-            ''install -Dm0644 ${kconfig} .config''
-          else
-            ''
-              python ${./kconfig.py} > extra.config
-              bash ${./merge_config.bash} configs/${boardName}_defconfig extra.config
-            ''
-        }
+        configurePhase = ''
+          runHook preConfigure
 
-        make olddefconfig
-        runHook postConfigure
-      '';
+          ${
+            if lib.isPath finalAttrs.kconfig then
+              ''install -Dm0644 ${finalAttrs.kconfig} .config''
+            else
+              ''
+                python ${./kconfig.py} > extra.config
+                bash ${./merge_config.bash} configs/${boardName}_defconfig extra.config
+              ''
+          }
 
-      installPhase = ''
-        runHook preInstall
+          make olddefconfig
+          runHook postConfigure
+        '';
 
-        ${lib.concatMapStrings (file: ''
-          install -Dm0644 --target-directory=$out ${file}
-        '') (artifacts ++ [ ".config" ])}
+        installPhase = ''
+          runHook preInstall
 
-        runHook postInstall
-      '';
-    };
+          ${lib.concatMapStrings (file: ''
+            install -Dm0644 --target-directory=$out ${file}
+          '') (finalAttrs.artifacts ++ [ ".config" ])}
+
+          runHook postInstall
+        '';
+      }
+    );
 }
