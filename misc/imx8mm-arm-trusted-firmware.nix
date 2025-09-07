@@ -1,7 +1,7 @@
 { buildArmTrustedFirmware }:
-buildArmTrustedFirmware (finalAttrs: {
+buildArmTrustedFirmware rec {
   platform = "imx8mm";
-  meta.platforms = [ "aarch64-linux" ];
-  makeFlags = [ "IMX_BOOT_UART_BASE=auto" ];
-  filesToInstall = [ "build/${finalAttrs.platform}/release/bl31.bin" ];
-})
+  extraMeta.platforms = [ "aarch64-linux" ];
+  extraMakeFlags = [ "IMX_BOOT_UART_BASE=auto" ];
+  filesToInstall = [ "build/${platform}/release/bl31.bin" ];
+}
