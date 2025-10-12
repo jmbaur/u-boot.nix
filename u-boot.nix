@@ -43,14 +43,14 @@ lib.extendMkDerivation {
       inherit kconfig artifacts;
 
       pname = prevAttrs.pname or "uboot-${boardName}";
-      version = prevAttrs.version or "2025.07";
+      version = prevAttrs.version or "2025.10";
 
       src =
         prevAttrs.src or (fetchFromGitHub {
           owner = "u-boot";
           repo = "u-boot";
           rev = "v${finalAttrs.version}";
-          hash = "sha256-X+JhVkDudkvQo08hGwAChOeMZZR+iunT9aU6tSAuMmg=";
+          hash = "sha256-9y21xYwJ/ATFikCRuhalKjAhpRHmOZv6a7GDkLhbon4=";
         });
 
       __structuredAttrs = true;
