@@ -6,13 +6,15 @@
     let
       inherit (inputs.nixpkgs.lib)
         composeManyExtensions
+        const
+        flip
         genAttrs
         mapAttrs
         ;
     in
     {
-      formatter = mapAttrs (
-        _: pkgs:
+      formatter = mapAttrs (const (
+        pkgs:
         pkgs.treefmt.withConfig {
           runtimeInputs = [
             pkgs.nixfmt
@@ -24,14 +26,16 @@
           settings.formatter.ruff.options = [ "format" ];
           settings.formatter.ruff.includes = [ "*.py" ];
         }
-      ) inputs.self.legacyPackages;
+      )) inputs.self.legacyPackages;
       overlays.default = composeManyExtensions [
-        (final: _: {
-          makeUBoot = final.callPackage ./u-boot.nix { };
-          imxFirmware = final.callPackage ./misc/imx-firmware.nix { };
-          armTrustedFirmwareImx8mm = final.callPackage ./misc/imx8mm-arm-trusted-firmware.nix { };
-          armTrustedFirmwareImx8mp = final.callPackage ./misc/imx8mp-arm-trusted-firmware.nix { };
-        })
+        (flip (
+          const (final: {
+            makeUBoot = final.callPackage ./u-boot.nix { };
+            imxFirmware = final.callPackage ./misc/imx-firmware.nix { };
+            armTrustedFirmwareImx8mm = final.callPackage ./misc/imx8mm-arm-trusted-firmware.nix { };
+            armTrustedFirmwareImx8mp = final.callPackage ./misc/imx8mp-arm-trusted-firmware.nix { };
+          })
+        ))
         (import ./boards.nix)
       ];
       checks = mapAttrs (

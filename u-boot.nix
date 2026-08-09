@@ -43,14 +43,14 @@ lib.extendMkDerivation {
       inherit kconfig artifacts;
 
       pname = prevAttrs.pname or "uboot-${boardName}";
-      version = prevAttrs.version or "2026.01";
+      version = prevAttrs.version or "2026.07";
 
       src =
         prevAttrs.src or (fetchFromGitHub {
           owner = "u-boot";
           repo = "u-boot";
           rev = "v${finalAttrs.version}";
-          hash = "sha256-ym3yM0InFlmZp0zRlLWBmfCKQHPJNGKqm99bdPWOy5E=";
+          hash = "sha256-MJf4+MifD7Bzb2Fz11lIgFOaiAPgSbFnbM0Q3k5xWwQ=";
         });
 
       __structuredAttrs = true;
@@ -104,7 +104,7 @@ lib.extendMkDerivation {
 
         ${
           if lib.isPath finalAttrs.kconfig then
-            ''install -Dm0644 ${finalAttrs.kconfig} .config''
+            "install -Dm0644 ${finalAttrs.kconfig} .config"
           else
             ''
               python ${./kconfig.py} > extra.config
