@@ -1,6 +1,6 @@
 {
   description = "u-boot configuration within nix";
-  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.zst";
   outputs =
     inputs:
     let
